@@ -3,67 +3,67 @@ from random import randint  #на всякий случай
 from datetime import datetime   #для временных меток
 
 
-notesfile = open("notes.json", "w")
-notes = {} 
-dates = datetime
-notetext = str(input('Введите тело заметки:    '))
-dates = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-notetitle = str(input('Введите заголовок заметки:    '))
 
+def count():                        #функция для подсчёта количаства заметок
+    with open("notes.json") as n:   #загружаем файл
+        notes = json.load(n)        
+    if not notes:                   #если заметок не найдено
+        return 0                    #возвращаем 0
+    last_note = notes[-1]           #если есть - вернётся номер последней заметки
+    return last_note['Notecount']   #возвращаем номер последней заметки
 
-note = {                        #определяем заметку как словарь
-    'Notecount':  notecount,    #номер заметки
-    'Notetitle': notetitle,     #название заметк
-    'Dates': dates,             #дата создания заметки
-    'Text': notetext,           #тело заметки
-}
  
-def create_note():     #функция создания заметки. заготовка-пустышка.
-    #notecount = !!!нужно ввести счётчик!!!
+def create_note():                  #функция создания заметки
+    notecount = count()+1           #номер создаваемой заметки будет следующим за номером последней   
+    notetitle = str(input('Введите заголовок заметки:    '))
     notetext = str(input('Введите тело заметки:    '))
     dates = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    notetitle = str(input('Введите заголовок заметки:    '))
+    note = {                        #определяем заметку как словарь
+    'Notecount': notecount,         #номер заметки
+    'Notetitle': notetitle,         #название заметки
+    'Dates': dates,                 #дата создания заметки
+    'Text': notetext,               #тело заметки
+    }
     return note
 
 
-def save_note():          #функция сохранения заметки. заготовка-пустышка
-    json.dump(note, notesfile)
+def save_note(notes):               #функция сохранения заметки
+    with open("notes.json", "w") as n:  #загружаем файл для редактирования
+        json.dump(notes, n)         #сохраняем в формате json
 
 
 def all_notes():          #функция просмотра всех заметок   
     print("Все заметки")
-    notes = json.load(notesfile)
+    with open("notes.json") as n:   #загружаем файл
+        notes = json.load(n)  
     for note in notes:
         print(f"Номер заметки: {note['Notecount']}, Название заметки: {note['Notetitle']}, Дата создания: {note['Dates']}")
-    notecount = input("Введите номер заметки для просмотра: ")
-    for note in notes:
-        if note["Notecount"] == int(notecount):
-            print(f"Номер заметки: {note['Notecount']}, Название заметки: {note['Notetitle']}, Дата создания: {note['Dates']}")
-            return
-        print(f"Заметка с номером {notecount} не найдена!")
     
 
-def filter():           #функция фильтрации по дате 
+def filter(dates):           #функция фильтрации по дате 
     print(f"Заметки для даты {dates}:")
-    notes = json.load(notesfile)
-
-
-def delete_note():      #функция удаления заметки
-    all_notes()
-    notecount = int(input("Введите номер заметки, которую нужно удалить: "))
-    notes = json.load(notesfile)
+    with open("notes.json") as n:
+        notes = json.load(n)
     for note in notes:
         if dates == note['Dates'].split()[0]:
-            print(f"Номер заметки: {note['Notecount']}, Название заметки: {note['Notetitle']}, Дата создания: {note['Dates']}")
-            notes = [note for note in notes if note["Notecount"] != notecount]
-            save_note(notes)
+            print(f"Номер заметки: {note['Notecount']}, Название заметки: {note['Notetitle']}, Дата создания: {note['dates']}")
+
+
+def delete_note():          #функция удаления заметки
+    all_notes()
+    notecount = int(input("Введите номер заметки, которую нужно удалить: "))
+    with open("notes.json") as n:
+        notes = json.load(n)
+    notes = [note for note in notes if note["Notecount"] != notecount]  #выбираем все заметки, кроме указанной
+    save_note(notes)        #сохраняем в файл
     print(f"Заметка с номером {notecount} была успешно удалена!")
 
 
 def redact_note():      #фукнция редактирования заметки
     all_notes()
     notecount = int(input("Введите номер заметки для редактирования:  "))
-    notes = json.load(notesfile)
+    with open("notes.json") as n:
+        notes = json.load(n)
     for note in notes:
         if note["Notecount"] == notecount:
             note["Notetitle"] = input(f"Название заметки ({note['Notetitle']}): ")
@@ -73,7 +73,7 @@ def redact_note():      #фукнция редактирования замет�
     print(f"Заметка с номером {notecount} успешно обновлена!")
 
 
-def menu():             #функция главного меню
+def main():             #функция главного меню
      while True:
         print("Выберите опцию")
         print("1. Посмотреть список всех заметок")
@@ -90,7 +90,8 @@ def menu():             #функция главного меню
 
         elif choice == "2":
             note = create_note()
-            notes = json.load(notesfile)
+            with open("notes.json") as n:
+                notes = json.load(n)
             notes.append(note)
             save_note(notes)
             print("Заметка успешно добавлена!")
@@ -112,5 +113,5 @@ def menu():             #функция главного меню
         else:
             print("Неверный выбор.")
 
-if __name__ == "__menu__":
-    menu()
+if __name__ == "__main__":
+    main()
